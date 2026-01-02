@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Todo SaaS Pro - Multi-utilisateur</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 50px;
+        }
+        .container {
+            background: #fff;
+            padding: 30px 40px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 500px;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        input[type="text"] {
+            width: 70%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+        button.add {
+            padding: 10px 15px;
+            font-size: 16px;
+            border-radius: 8px;
+            border: none;
+            background: #3498db;
+            color: #fff;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button.add:hover {
+            background: #2980b9;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin-top: 20px;
+        }
+        li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            background: #ecf0f1;
+            border-radius: 8px;
+            transition: background 0.2s;
+            cursor: pointer;
+        }
+        li.completed {
+            text-decoration: line-through;
+            color: gray;
+            background: #d0d7de;
+        }
+        li:hover {
+            background: #dfe6ed;
+        }
+        li button.delete {
+            background: #e74c3c;
+            border: none;
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        li button.delete:hover {
+            background: #c0392b;
+        }
+
+        @media (max-width: 600px) {
+            body { padding: 20px; }
+            input[type="text"] { width: 60%; }
+            button.add { padding: 10px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Todo SaaS Pro</h1>
+        <div style="display:flex; margin-bottom:10px;">
+            <input type="text" id="taskInput" placeholder="Ajouter une tâche">
+            <button class="add" onclick="addTask()">Ajouter</button>
+        </div>
+        <ul id="taskList"></ul>
+    </div>
+
+    <script>
+        // Récupérer l'utilisateur actuel
+        let currentUser = localStorage.getItem("currentUser");
+        if(!currentUser) {
+            // Si personne n'est connecté, redirige vers login
+            window.location.href = "login.html";
+        }
+
+        // Charger les tâches pour cet utilisateur
+        let tasks = JSON.parse(localStorage.getItem(currentUser)) || [];
+
+        const taskList = document.getElementById("taskList");
+        const taskInput = document.getElementById("taskInput");
+
+        function renderTasks() {
+            taskList.innerHTML = "";
+            tasks.forEach((task, index) => {
+                const li = document.createElement("li");
+                li.textContent = task.text;
+                if(task.completed) li.classList.add("completed");
+
+                li.onclick = () => toggleTask(index);
+
+                const delBtn = document.createElement("button");
+                delBtn.textContent = "Supprimer";
+                delBtn.className = "delete";
+                delBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    deleteTask(index);
+                };
+
+                li.appendChild(delBtn);
+                taskList.appendChild(li);
+            });
+            // Sauvegarde les tâches pour cet utilisateur
+            localStorage.setItem(currentUser, JSON.stringify(tasks));
+        }
+
+        function addTask() {
+            const text = taskInput.value.trim();
+            if(text === "") return;
+            tasks.push({text: text, completed: false});
+            taskInput.value = "";
+            renderTasks();
+        }
+
+        function toggleTask(index) {
+            tasks[index].completed = !tasks[index].completed;
+            renderTasks();
+        }
+
+        function deleteTask(index) {
+            tasks.splice(index, 1);
+            renderTasks();
+        }
+
+        renderTasks();
+    </script>
+</body>
+</html>
